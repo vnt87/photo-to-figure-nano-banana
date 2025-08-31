@@ -90,7 +90,7 @@ function App() {
     };
 
     return (
-        <main className="bg-green-950 text-neutral-200 min-h-screen w-full flex flex-col items-center justify-center p-4 pb-24 overflow-hidden relative">
+        <main className="bg-black text-neutral-200 min-h-screen w-full flex flex-col items-center justify-center p-4 pb-24 overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-full bg-grid-white/[0.05]"></div>
             
             <div className="z-10 flex flex-col items-center justify-center w-full h-full flex-1 min-h-0">
@@ -101,7 +101,7 @@ function App() {
                     className="text-center mb-10"
                 >
                     <h1 className="text-6xl md:text-8xl font-grape-nuts font-bold text-neutral-100">Tạo Hình Của Bạn</h1>
-                    <p className="font-grape-nuts text-neutral-400 text-2xl">bởi HABU</p>
+                    <p className="font-grape-nuts text-neutral-400 text-2xl">bởi Nam Vu</p>
                     <p className="font-grape-nuts text-neutral-300 mt-4 text-2xl tracking-wide">Tạo một nhân vật tùy chỉnh từ ảnh của bạn.</p>
                 </motion.div>
 
