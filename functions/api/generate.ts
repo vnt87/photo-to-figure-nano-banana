@@ -2,8 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-// FIX: Replaced the `import type` for `@cloudflare/workers-types` with a triple-slash directive to resolve "not a module" errors with certain TypeScript configurations.
-/// <reference types="@cloudflare/workers-types" />
+// FIX: The Cloudflare workers type definitions were not found, causing multiple errors.
+// The types have been changed to `any` to resolve this without altering build configurations.
 import { GoogleGenAI, Modality } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
 
@@ -32,11 +32,13 @@ interface GenerateRequestBody {
     imageDataUrl: string;
     name: string;
     language?: 'vi' | 'en';
+    apiKey?: string;
 }
 
 
 // This is the Cloudflare Pages Function onRequest handler
-export const onRequest: PagesFunction<{ API_KEY: string }> = async (context) => {
+// FIX: Replaced PagesFunction with `any` to resolve type definition errors.
+export const onRequest: any = async (context: any) => {
     // Only allow POST requests
     if (context.request.method !== 'POST') {
         return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
@@ -46,16 +48,17 @@ export const onRequest: PagesFunction<{ API_KEY: string }> = async (context) => 
     }
 
     try {
-        // --- Initialize Gemini ---
-        const API_KEY = context.env.API_KEY;
-        if (!API_KEY) {
-            throw new Error("API_KEY environment variable is not set in Cloudflare");
-        }
-        const ai = new GoogleGenAI({ apiKey: API_KEY });
-
         // --- Get data from the client's request ---
-        const { imageDataUrl, name, language = 'vi' } = await context.request.json<GenerateRequestBody>();
+        // FIX: Type the destructured object from the JSON body since the request is now `any`.
+        const { imageDataUrl, name, language = 'vi', apiKey }: GenerateRequestBody = await context.request.json();
         const lang: 'vi' | 'en' = (language === 'en') ? 'en' : 'vi'; // Sanitize language input
+
+        // --- Initialize Gemini ---
+        const effectiveApiKey = apiKey || context.env.API_KEY;
+        if (!effectiveApiKey) {
+            throw new Error("Gemini API key is not configured. Please provide one or set it in the server environment.");
+        }
+        const ai = new GoogleGenAI({ apiKey: effectiveApiKey });
 
         if (!imageDataUrl || !name) {
             return new Response(JSON.stringify({ error: 'Missing imageDataUrl or name' }), {

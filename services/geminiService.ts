@@ -9,9 +9,10 @@ import type { Language } from '../lib/i18n/LanguageContext';
  * @param imageDataUrl A data URL string of the source image (e.g., 'data:image/png;base64,...').
  * @param name The name for the figure, to be used in the prompt.
  * @param language The current language ('vi' or 'en').
+ * @param apiKey An optional user-provided Gemini API key.
  * @returns A promise that resolves to a base64-encoded image data URL of the generated image.
  */
-export async function generateImage(imageDataUrl: string, name: string, language: Language): Promise<string> {
+export async function generateImage(imageDataUrl: string, name: string, language: Language, apiKey: string | null): Promise<string> {
     try {
         const response = await fetch('/api/generate', {
             method: 'POST',
@@ -22,6 +23,7 @@ export async function generateImage(imageDataUrl: string, name: string, language
                 imageDataUrl,
                 name,
                 language,
+                apiKey,
             }),
         });
 

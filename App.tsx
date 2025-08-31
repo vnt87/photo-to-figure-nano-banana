@@ -7,7 +7,9 @@ import { motion } from 'framer-motion';
 import { generateImage } from './services/geminiService';
 import PolaroidCard from './components/PolaroidCard';
 import Footer from './components/Footer';
+import ApiKeyModal from './components/ApiKeyModal';
 import { useLanguage } from './lib/i18n/LanguageContext';
+import { useApiKey } from './lib/ApiKeyContext';
 
 interface GeneratedImage {
     status: 'pending' | 'done' | 'error';
@@ -22,11 +24,13 @@ const textInputClasses = "bg-neutral-800 border-2 border-neutral-700 text-neutra
 
 function App() {
     const { t, language } = useLanguage();
+    const { apiKey, setApiKey, clearApiKey } = useApiKey();
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [name, setName] = useState<string>('');
     const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [appState, setAppState] = useState<'idle' | 'image-uploaded' | 'generating' | 'results-shown'>('idle');
+    const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
 
 
     const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +55,7 @@ function App() {
         setGeneratedImage({ status: 'pending' });
 
         try {
-            const resultUrl = await generateImage(uploadedImage, name, language);
+            const resultUrl = await generateImage(uploadedImage, name, language, apiKey);
             setGeneratedImage({ status: 'done', url: resultUrl });
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
@@ -89,6 +93,16 @@ function App() {
             document.body.removeChild(link);
         }
     };
+
+    const handleApiKeySave = (key: string) => {
+        setApiKey(key);
+        setIsApiKeyModalOpen(false);
+    }
+    
+    const handleApiKeyClear = () => {
+        clearApiKey();
+        setIsApiKeyModalOpen(false);
+    }
 
     return (
         <main className="bg-black text-neutral-200 min-h-screen w-full flex flex-col items-center justify-center p-4 pb-24 overflow-hidden relative">
@@ -194,7 +208,15 @@ function App() {
                     </motion.div>
                 )}
             </div>
-            <Footer />
+            <Footer onApiKeyClick={() => setIsApiKeyModalOpen(true)} />
+
+            <ApiKeyModal 
+                isOpen={isApiKeyModalOpen}
+                currentKey={apiKey}
+                onClose={() => setIsApiKeyModalOpen(false)}
+                onSave={handleApiKeySave}
+                onClear={handleApiKeyClear}
+            />
         </main>
     );
 }
