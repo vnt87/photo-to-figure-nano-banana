@@ -6,6 +6,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { DraggableCardContainer, DraggableCardBody } from './ui/draggable-card';
 import { cn } from '../lib/utils';
 import type { PanInfo } from 'framer-motion';
+import { useLanguage } from '../lib/i18n/LanguageContext';
 
 type ImageStatus = 'pending' | 'done' | 'error';
 
@@ -37,18 +38,22 @@ const ErrorDisplay = () => (
     </div>
 );
 
-const Placeholder = () => (
-    <div className="flex flex-col items-center justify-center h-full text-neutral-500 group-hover:text-neutral-300 transition-colors duration-300">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <span className="font-grape-nuts text-2xl">Tải Ảnh Lên</span>
-    </div>
-);
+const Placeholder = () => {
+    const { t } = useLanguage();
+    return (
+        <div className="flex flex-col items-center justify-center h-full text-neutral-500 group-hover:text-neutral-300 transition-colors duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="font-grape-nuts text-2xl">{t('uploadPhoto')}</span>
+        </div>
+    )
+};
 
 
 const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, error, dragConstraintsRef, onShake, onDownload, isMobile }) => {
+    const { t } = useLanguage();
     const [isDeveloped, setIsDeveloped] = useState(false);
     const [isImageLoaded, setIsImageLoaded] = useState(false);
     const lastShakeTime = useRef(0);
@@ -125,7 +130,7 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
                                         onDownload();
                                     }}
                                     className="p-2 bg-black/50 rounded-full text-white hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white"
-                                    aria-label={`Tải xuống hình ảnh cho ${caption}`}
+                                    aria-label={t('downloadImageAria', { caption })}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -139,7 +144,7 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
                                         onShake();
                                     }}
                                     className="p-2 bg-black/50 rounded-full text-white hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white"
-                                    aria-label={`Tạo lại hình ảnh cho ${caption}`}
+                                    aria-label={t('regenerateImageAria', { caption })}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.899 2.186l-1.42.71a5.002 5.002 0 00-8.479-1.554H10a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm12 14a1 1 0 01-1-1v-2.101a7.002 7.002 0 01-11.899-2.186l1.42-.71a5.002 5.002 0 008.479 1.554H10a1 1 0 110-2h6a1 1 0 011 1v6a1 1 0 01-1 1z" clipRule="evenodd" />
@@ -181,6 +186,11 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
                 )}>
                     {caption}
                 </p>
+                {status === 'error' && error && (
+                     <p className="font-sans text-xs text-red-700 mt-1 whitespace-normal break-words">
+                        {error}
+                    </p>
+                )}
             </div>
         </>
     );
@@ -188,7 +198,7 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
     // Use a simpler div for mobile/non-draggable context
     if (isMobile || !dragConstraintsRef) {
         return (
-            <div className="bg-neutral-100 dark:bg-neutral-100 !p-4 !pb-16 flex flex-col items-center justify-start aspect-[3/4] w-80 max-w-full rounded-md shadow-lg relative">
+            <div className="bg-neutral-100 dark:bg-neutral-100 !p-4 !pb-24 flex flex-col items-center justify-start aspect-[3/4] w-80 max-w-full rounded-md shadow-lg relative">
                 {cardInnerContent}
             </div>
         );
@@ -197,7 +207,7 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
     return (
         <DraggableCardContainer>
             <DraggableCardBody 
-                className="bg-neutral-100 dark:bg-neutral-100 !p-4 !pb-16 flex flex-col items-center justify-start aspect-[3/4] w-80 max-w-full"
+                className="bg-neutral-100 dark:bg-neutral-100 !p-4 !pb-24 flex flex-col items-center justify-start aspect-[3/4] w-80 max-w-full"
                 dragConstraintsRef={dragConstraintsRef}
                 onDragStart={handleDragStart}
                 onDrag={handleDrag}

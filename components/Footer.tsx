@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import React from 'react';
+import { useLanguage } from '../lib/i18n/LanguageContext';
+import { cn } from '../lib/utils';
+
 
 const GithubIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2">
@@ -10,22 +13,50 @@ const GithubIcon = () => (
     </svg>
 );
 
+const LanguageToggle = () => {
+    const { language, setLanguage } = useLanguage();
+
+    const toggleLanguage = () => {
+        setLanguage(language === 'vi' ? 'en' : 'vi');
+    };
+  
+    return (
+        <div className="relative flex items-center bg-neutral-800/50 border border-neutral-700 rounded-full p-1 cursor-pointer" onClick={toggleLanguage}>
+            <div className={cn(
+                "absolute top-1/2 left-1 -translate-y-1/2 h-6 w-8 bg-yellow-400 rounded-full transition-transform duration-300 ease-in-out",
+                language === 'en' && 'transform translate-x-[calc(100%+4px)]'
+            )}></div>
+            <span className={cn(
+                "relative z-10 w-8 text-center text-xs font-bold transition-colors duration-300",
+                language === 'vi' ? 'text-black' : 'text-white'
+            )}>VI</span>
+            <span className={cn(
+                "relative z-10 w-8 text-center text-xs font-bold transition-colors duration-300",
+                language === 'en' ? 'text-black' : 'text-white'
+            )}>EN</span>
+        </div>
+    );
+};
+
 
 const Footer = () => {
     return (
-        <footer className="fixed bottom-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-3 z-50 text-neutral-300 text-sm border-t border-white/10 text-center">
-            <div className="max-w-screen-xl mx-auto flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 px-4 text-neutral-400">
-                <span>Powered by Gemini Nano Banana</span>
-                <span className="hidden sm:inline text-neutral-600" aria-hidden="true">|</span>
-                <a
-                    href="https://github.com/vnt87/photo-to-figure-nano-banana"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center text-neutral-400 hover:text-yellow-400 transition-colors duration-200"
-                >
-                    <GithubIcon />
-                    View Source
-                </a>
+        <footer className="fixed bottom-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-3 z-50 text-neutral-300 text-sm border-t border-white/10">
+            <div className="max-w-screen-xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 px-4 text-neutral-400">
+                <div className="flex items-center gap-4">
+                    <span>Powered by Gemini Nano Banana</span>
+                    <span className="hidden sm:inline text-neutral-600" aria-hidden="true">|</span>
+                    <a
+                        href="https://github.com/vnt87/photo-to-figure-nano-banana"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center text-neutral-400 hover:text-yellow-400 transition-colors duration-200"
+                    >
+                        <GithubIcon />
+                        View Source
+                    </a>
+                </div>
+                <LanguageToggle />
             </div>
         </footer>
     );

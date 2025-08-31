@@ -2,11 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import React, { useState, ChangeEvent, useRef } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { motion } from 'framer-motion';
 import { generateImage } from './services/geminiService';
 import PolaroidCard from './components/PolaroidCard';
 import Footer from './components/Footer';
+import { useLanguage } from './lib/i18n/LanguageContext';
 
 interface GeneratedImage {
     status: 'pending' | 'done' | 'error';
@@ -20,6 +21,7 @@ const textInputClasses = "bg-neutral-800 border-2 border-neutral-700 text-neutra
 
 
 function App() {
+    const { t, language } = useLanguage();
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [name, setName] = useState<string>('');
     const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
@@ -49,8 +51,7 @@ function App() {
         setGeneratedImage({ status: 'pending' });
 
         try {
-            const prompt = `Create a 1/7 scale commercialized figure of the character in the illustration, in a realistic style and environment. Place the figure on clear acrylic stand. Next to the computer screen, display the ZBrush modeling process of the figure. Next to the computer screen, place a BANDAI-style toy packaging box with title ${name} printed with the original artwork.`;
-            const resultUrl = await generateImage(uploadedImage, prompt);
+            const resultUrl = await generateImage(uploadedImage, name, language);
             setGeneratedImage({ status: 'done', url: resultUrl });
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
@@ -100,9 +101,9 @@ function App() {
                     transition={{ duration: 0.5 }}
                     className="text-center mb-10"
                 >
-                    <h1 className="text-6xl md:text-8xl font-grape-nuts font-bold text-neutral-100">Tạo Hình Của Bạn</h1>
-                    <p className="font-grape-nuts text-neutral-400 text-2xl">bởi Nam Vu</p>
-                    <p className="font-grape-nuts text-neutral-300 mt-4 text-2xl tracking-wide">Tạo một nhân vật tùy chỉnh từ ảnh của bạn.</p>
+                    <h1 className="text-6xl md:text-8xl font-grape-nuts font-bold text-neutral-100">{t('appTitle')}</h1>
+                    <p className="font-grape-nuts text-neutral-400 text-2xl">{t('author')}</p>
+                    <p className="font-grape-nuts text-neutral-300 mt-4 text-2xl tracking-wide">{t('appSubtitle')}</p>
                 </motion.div>
 
                 {appState === 'idle' && (
@@ -115,13 +116,13 @@ function App() {
                         >
                             <label htmlFor="file-upload" className="cursor-pointer group transform hover:scale-105 transition-transform duration-300">
                                  <PolaroidCard 
-                                     caption="Nhấp để bắt đầu"
+                                     caption={t('startCaption')}
                                      status="done"
                                  />
                             </label>
                             <input id="file-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleImageUpload} />
                             <p className="mt-8 font-grape-nuts text-neutral-500 text-center max-w-xs text-xl">
-                                Nhấp vào polaroid để tải ảnh lên và tạo nhân vật tùy chỉnh của riêng bạn.
+                                {t('startHint')}
                             </p>
                         </motion.div>
                     </div>
@@ -136,7 +137,7 @@ function App() {
                     >
                          <PolaroidCard 
                             imageUrl={uploadedImage} 
-                            caption="Ảnh Của Bạn" 
+                            caption={t('yourImageCaption')} 
                             status="done"
                          />
                          <div className="flex flex-col items-center gap-4 mt-4 w-full md:w-auto">
@@ -146,15 +147,15 @@ function App() {
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Nhập tên cho nhân vật..."
+                                placeholder={t('figureNamePlaceholder')}
                                 className={textInputClasses}
                             />
                             <div className="flex items-center gap-4">
                                 <button onClick={handleReset} className={secondaryButtonClasses}>
-                                    Ảnh Khác
+                                    {t('otherImageButton')}
                                 </button>
                                 <button onClick={handleGenerateClick} disabled={!name.trim()} className={primaryButtonClasses}>
-                                    Tạo Ra
+                                    {t('generateButton')}
                                 </button>
                             </div>
                          </div>
@@ -169,7 +170,7 @@ function App() {
                         className="flex flex-col items-center gap-6"
                     >
                         <PolaroidCard
-                            caption={name || "Hình Của Bạn"}
+                            caption={name || t('yourFigureCaption')}
                             status={generatedImage.status}
                             imageUrl={generatedImage.url}
                             error={generatedImage.error}
@@ -180,13 +181,13 @@ function App() {
                             {appState === 'results-shown' && (
                                 <div className="flex flex-col sm:flex-row items-center gap-4">
                                     <button onClick={handleReset} className={secondaryButtonClasses}>
-                                        Bắt Đầu Lại
+                                        {t('tryAgainButton')}
                                     </button>
                                 </div>
                             )}
                              {appState === 'generating' && (
                                 <p className="font-grape-nuts text-neutral-400 text-xl animate-pulse">
-                                    Đang tạo hình của bạn...
+                                    {t('generatingMessage')}
                                 </p>
                             )}
                         </div>
